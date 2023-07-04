@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson.json_util import dumps
 from bson.objectid import ObjectId
+from datetime import datetime
 
 load_dotenv()
 
@@ -12,6 +13,18 @@ mongo_db_url = os.environ.get("MONGO_DB_CONN_STRING")
 
 client = MongoClient(mongo_db_url)
 db = client['sensors_db']
+
+
+def compare_dates(date1, date2):
+    # convert string to date
+    dt_obj2 = datetime.strptime(date2, "%Y-%m-%d %H:%M:%S")
+
+    if date1 == dt_obj2:
+        print('ALAAARMMM!!!!!!!!')
+        return 1
+    else:
+        return 0
+
 
 @app.get("/api/sensors")
 def get_sensors():
@@ -23,14 +36,25 @@ def get_sensors():
         response=dumps(sensors), status=200,  mimetype="application/json")
     return response
 
-@app.post("/api/sensors")
-def add_sensor():
-    _json = request.json
-    db.sensors.insert_one(_json)
+@app.get("/api/activealarms")
+def active_alarms():
+    response="No active alarms"
+    now = datetime.now().replace( second= 0, microsecond= 0 )
+    alarm_time = request.args.get('sensor_id')
+    filter = {} if alarm_time is None else {"alarm_time": alarm_time}
+    times = list(db.sensors.find(filter))
 
-    resp = jsonify({"message": "Sensor added successfully"})
-    resp.status_code = 200
-    return resp
+    for i in range(0, len(times)):
+        print("i",i)
+        print("times[i]", times[i])
+        res = compare_dates(now, times[i]['alarm_time'])
+
+        if res ==1:
+            response = Response(
+                response=dumps(times[i]), status=200,  mimetype="application/json")
+            print (response)
+
+    return response
 
 
 @app.delete("/api/sensors/<id>")
