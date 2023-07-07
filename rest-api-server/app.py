@@ -13,7 +13,7 @@ mongo_db_url = os.environ.get("MONGO_DB_CONN_STRING")
 
 client = MongoClient(mongo_db_url)
 db = client['sensors_db']
-
+db_temp = client['temperature']
 
 def compare_dates(date1, date2):
     # convert string to date
@@ -25,12 +25,48 @@ def compare_dates(date1, date2):
     else:
         return 0
 
+@app.post("/api/sensors")
+def add_sensor():
+    _json = request.json
+    if _json['userId'] == 4:
+        _json.update({"name": "Johanna"})
+    if _json['userId'] == 99:
+        _json.update({"name": "Poornima"})
+    if _json['userId'] == 249:
+        _json.update({"name": "General"})
+         
+    db.sensors.insert_one(_json)
+
+    resp = jsonify({"message": "Sensor added successfully"})
+    resp.status_code = 200
+    return resp
+
+@app.post("/api/temperature")
+def add_temperature():
+    now = datetime.now().replace( second= 0, microsecond= 0 )
+    _json = request.json
+    _json.update({"timestamp": now.strftime("%m/%d/%Y %H:%M:%S")})    
+    db_temp.temperature.insert_one(_json)
+
+    resp = jsonify({"message": "Temperature added successfully"})
+    resp.status_code = 200
+    return resp
 
 @app.get("/api/sensors")
 def get_sensors():
     sensor_id = request.args.get('sensor_id')
     filter = {} if sensor_id is None else {"sensor_id": sensor_id}
     sensors = list(db.sensors.find(filter))
+
+    response = Response(
+        response=dumps(sensors), status=200,  mimetype="application/json")
+    return response
+
+@app.get("/api/temperature")
+def get_temperature():
+    temperature_id = request.args.get('temperature_id')
+    filter = {} if temperature_id is None else {"temperature_id": temperature_id}
+    sensors = list(db_temp.temperature.find(filter))
 
     response = Response(
         response=dumps(sensors), status=200,  mimetype="application/json")
