@@ -1,7 +1,7 @@
 # python-flask-mongodb-projects
 Contains projects that uses Flask MongoDB as backend database using Python
 
-Pull the code and switch to branch personal_assistant.
+Pull the code and switch to branch personal_assistant and cd into rest-api-server.
 
 Create a file called .env and paste this MONGO_DB_CONN_STRING=mongodb+srv://poornimam19032000:72EB9z1wKr6MRrFL@personalassistant.eek06se.mongodb.net/
 
