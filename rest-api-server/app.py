@@ -45,6 +45,7 @@ def add_sensor():
     now = datetime.now().replace( second= 0, microsecond= 0 )
     current_time = now.strftime("%H.%M.%S")
     _json = request.json
+    print(_json)
     _json['userId'] = int(_json['userId'])
     if _json['userId'] == 4:
         _json.update({"name": "Johanna"})
@@ -96,9 +97,11 @@ def get_temperature():
     temperature_id = request.args.get('temperature_id')
     filter = {} if temperature_id is None else {"temperature_id": temperature_id}
     sensors = list(db_temp.temperature.find(filter))
+    length1= len(sensors)
+    print("sensors[length1-1]", sensors[length1-1])
 
     response = Response(
-        response=dumps(sensors[48]), status=200,  mimetype="application/json")
+        response=dumps(sensors[length1-1]), status=200,  mimetype="application/json")
     return response
 
 @app.get("/api/activealarms")
@@ -128,6 +131,8 @@ def delete_sensor(id):
     db.sensors.delete_one({'_id': ObjectId(id)})
 
     resp = jsonify({"message": "Sensor deleted successfully"})
+    resp.headers.add('Access-Control-Allow-Origin', '*')
+
     resp.status_code = 200
     return resp 
 
