@@ -45,6 +45,7 @@ def add_sensor():
     now = datetime.now().replace( second= 0, microsecond= 0 )
     current_time = now.strftime("%H.%M.%S")
     _json = request.json
+    print("_json")
     print(_json)
     _json['userId'] = int(_json['userId'])
     if _json['userId'] == 4:
@@ -121,7 +122,12 @@ def active_alarms():
         if res ==1:
             response = Response(
                 response=dumps(times[i]), status=200,  mimetype="application/json")
+            print("respoooonseeeeeeee!")
+            print(times[i]['_id'])
             print (response)
+        # delete_sensor(response['_id']['$oid'])
+            db.sensors.delete_one({'_id': times[i]['_id']})
+            # delete_sensor(times[i]['_id'])
 
     return response
 
